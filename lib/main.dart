@@ -12,7 +12,7 @@ import 'package:insta_clone/utils/colors.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // ignore: await_only_futures
-  await Firebase.initializeApp;
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
