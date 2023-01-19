@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:insta_clone/resources/auth_methods.dart';
+import 'package:insta_clone/responsive/mobile_screen_layout.dart';
+import 'package:insta_clone/responsive/responsive_layout_screen.dart';
+import 'package:insta_clone/screens/login_screen.dart';
 import 'package:insta_clone/utils/colors.dart';
 import 'package:insta_clone/utils/utils.dart';
 import 'package:insta_clone/widgets/text_field_input.dart';
@@ -55,7 +58,24 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (res != 'success') {
       showSnackBar(res, context);
-    } else {}
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ResponsiveLayout(
+            mobileScreenLayout: MobileScreenLayout(),
+            //webScreenLayout: WebScreenLayout(),
+          ),
+        ),
+      );
+    }
+  }
+
+  void navigateToLogin() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => LoginScreen(),
+      ),
+    );
   }
 
   @override
@@ -139,7 +159,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   height: 25,
                 ),
                 InkWell(
-                  onTap: signUpUser,
+                  onTap: navigateToLogin,
                   child: Container(
                     child: _isLoading
                         ? Center(
