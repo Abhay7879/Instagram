@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:insta_clone/models/user.dart';
 import 'package:insta_clone/providers/user_provider.dart';
+import 'package:insta_clone/resources/firestore_methods.dart';
 import 'package:insta_clone/utils/colors.dart';
 import 'package:insta_clone/utils/utils.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,41 @@ class AddPostScreen extends StatefulWidget {
 class _AddPostScreenState extends State<AddPostScreen> {
   Uint8List? _file;
   final TextEditingController _descriptionController = TextEditingController();
+  bool _isLoading = false;
+
+  void postImage(
+    String uid,
+    String username,
+    String profImage,
+  ) async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      String res = await FirestoreMethods().uploadPost(
+        _descriptionController.text,
+        _file!,
+        uid,
+        username,
+        profImage,
+      );
+
+      if (res == "success") {
+        setState(() {
+          _isLoading = false;
+        });
+        clearImage();
+        showSnackBar('Posted', context);
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        showSnackBar(res, context);
+      }
+    } catch (e) {
+      showSnackBar(e.toString(), context);
+    }
+  }
 
   _selectImage(BuildContext context) async {
     return showDialog(
@@ -40,7 +76,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
               ),
               SimpleDialogOption(
                 padding: EdgeInsets.all(20),
-                child: Text('Galary'),
+                child: Text('Gallary'),
                 onPressed: () async {
                   Navigator.of(context).pop();
                   Uint8List file = await pickImage(
@@ -63,6 +99,17 @@ class _AddPostScreenState extends State<AddPostScreen> {
         });
   }
 
+  void clearImage() {
+    setState(() {
+      _file = null;
+    });
+  }
+
+  void dispose() {
+    super.dispose();
+    _descriptionController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final User user = Provider.of<UserProvider>(context).getUser;
@@ -81,12 +128,16 @@ class _AddPostScreenState extends State<AddPostScreen> {
               backgroundColor: mobileBackgroundColor,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back),
-                onPressed: () {},
+                onPressed: clearImage,
               ),
               title: Text('Post to'),
               actions: [
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () => postImage(
+                    user.uid,
+                    user.username,
+                    user.photoUrl,
+                  ),
                   child: Text(
                     'post',
                     style: TextStyle(
@@ -100,6 +151,12 @@ class _AddPostScreenState extends State<AddPostScreen> {
             ),
             body: Column(
               children: [
+                _isLoading
+                    ? LinearProgressIndicator()
+                    : Padding(
+                        padding: EdgeInsets.only(top: 0),
+                      ),
+                Divider(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.start,
